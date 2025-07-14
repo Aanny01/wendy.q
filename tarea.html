@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini Juegos Divertidos 🎮</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    header {
+      background-color: #2c3e50;
+      width: 100%;
+      padding: 15px 0;
+      color: white;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+      user-select: none;
+    }
+    nav {
+      margin: 20px 0;
+    }
+    nav button {
+      background-color: #3498db;
+      border: none;
+      padding: 12px 20px;
+      margin: 0 10px;
+      border-radius: 8px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    nav button:hover {
+      background-color: #2980b9;
+    }
+    #game-container {
+      width: 80vw;
+      max-width: 600px;
+      height: 400px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+      padding: 15px;
+      user-select: none;
+    }
+    #info {
+      margin-top: 15px;
+      font-size: 1.2rem;
+      text-align: center;
+      min-height: 1.5em;
+    }
+    /* Juego 1: Atrapa el cuadrado */
+    #square {
+      width: 50px;
+      height: 50px;
+      background-color: #e74c3c;
+      position: absolute;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: left 0.2s ease, top 0.2s ease;
+    }
+    /* Juego 2: Clicker círculos */
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    /* Juego 3: Evita el cuadrado */
+    #player {
+      width: 40px;
+      height: 40px;
+      background-color: #27ae60;
+      border-radius: 50%;
+      position: absolute;
+      top: 180px;
+      left: 280px;
+    }
+    #enemy {
+      width: 50px;
+      height: 50px;
+      background-color: #c0392b;
+      position: absolute;
+      border-radius: 10px;
+      top: 50px;
+      left: 50px;
+    }
+    /* Botón para reiniciar */
+    #restart-btn {
+      margin-top: 15px;
+      padding: 8px 15px;
+      background-color: #34495e;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      display: none;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    }
+    #restart-btn:hover {
+      background-color: #2c3a50;
+    }
+  </style>
+</head>
+<body>
+
+<header>Mini Juegos Divertidos 🎮</header>
+
+<nav>
+  <button id="btn-game1">Atrapa el Cuadrado</button>
+  <button id="btn-game2">Clicker de Círculos</button>
+  <button id="btn-game3">Evita el Cuadrado</button>
+</nav>
+
+<div id="game-container">
+  <!-- Aquí se cargarán los juegos -->
+</div>
+
+<div id="info"></div>
+<button id="restart-btn">Reiniciar Juego</button>
+
+<script>
+  const gameContainer = document.getElementById('game-container');
+  const info = document.getElementById('info');
+  const restartBtn = document.getElementById('restart-btn');
+
+  // Limpiar juego
+  function clearGame() {
+    gameContainer.innerHTML = '';
+    info.textContent = '';
+    restartBtn.style.display = 'none';
+    // Eliminar listeners globales para evitar conflicto
+    window.onkeydown = null;
+    clearInterval(gameInterval);
+  }
+
+  // Variables para control de intervalos
+  let gameInterval;
+
+  // --- Juego 1: Atrapa el Cuadrado ---
+  function game1() {
+    clearGame();
+    info.textContent = 'Haz clic en el cuadrado rojo rápido para ganar puntos. ¡Tienes 20 segundos!';
+
+    let points = 0;
+    let timeLeft = 20;
+
+    // Crear cuadrado
+    const square = document.createElement('div');
+    square.id = 'square';
+    gameContainer.appendChild(square);
+
+    // Función para mover el cuadrado rápido (cada 1 segundo)
+    function moveSquare() {
+      const maxX = gameContainer.clientWidth - square.clientWidth;
+      const maxY = gameContainer.clientHeight - square.clientHeight;
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+      square.style.left = x + 'px';
+      square.style.top = y + 'px';
+    }
+
+    // Actualizar timer cada segundo
+    const timer = setInterval(() => {
+      timeLeft--;
+      info.textContent = `Tiempo: ${timeLeft} seg | Puntuación: ${points}`;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        clearInterval(gameInterval);
+        square.style.display = 'none';
+        info.textContent = `¡Tiempo terminado! Tu puntuación final es: ${points}`;
+        restartBtn.style.display = 'inline-block';
+      }
+    }, 1000);
+
+    square.addEventListener('click', () => {
+      points++;
+      moveSquare();
+    });
+
+    moveSquare();
+    gameInterval = setInterval(moveSquare, 1000);
+
+    restartBtn.onclick = () => game1();
+  }
+
+  // --- Juego 2: Clicker de Círculos ---
+  function game2() {
+    clearGame();
+    info.textContent = 'Haz clic en los círculos verdes que aparecen y desaparecen. Tienes 30 segundos.';
+
+    let points = 0;
+    let timeLeft = 30;
+
+    // Crear círculos en diferentes tamaños y colores
+    function createCircle() {
+      const circle = document.createElement('div');
+      circle.classList.add('circle');
+      const size = 30 + Math.random() * 40; // 30 a 70 px
+      circle.style.width = size + 'px';
+      circle.style.height = size + 'px';
+      circle.style.backgroundColor = '#27ae60';
+
+      const maxX = gameContainer.clientWidth - size;
+      const maxY = gameContainer.clientHeight - size;
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+      circle.style.left = x + 'px';
+      circle.style.top = y + 'px';
+
+      circle.style.transform = 'scale(1)';
+      gameContainer.appendChild(circle);
+
+      circle.addEventListener('click', () => {
+        points++;
+        info.textContent = `Tiempo: ${timeLeft} seg | Puntuación: ${points}`;
+        circle.remove();
+      });
+
+      // El círculo desaparece en 1.5 segundos si no se clickea
+      setTimeout(() => {
+        if (gameContainer.contains(circle)) circle.remove();
+      }, 1500);
+    }
+
+    const circleInterval = setInterval(createCircle, 800);
+
+    const timer = setInterval(() => {
+      timeLeft--;
+      info.textContent = `Tiempo: ${timeLeft} seg | Puntuación: ${points}`;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        clearInterval(circleInterval);
+        gameContainer.innerHTML = '';
+        info.textContent = `¡Tiempo terminado! Tu puntuación final es: ${points}`;
+        restartBtn.style.display = 'inline-block';
+      }
+    }, 1000);
+
+    restartBtn.onclick = () => game2();
+  }
+
+  // --- Juego 3: Evita el Cuadrado ---
+  function game3() {
+    clearGame();
+    info.textContent = 'Usa las flechas para mover el círculo verde. ¡Evita chocar con el cuadrado rojo!';
+
+    // Crear jugador y enemigo
+    const player = document.createElement('div');
+    player.id = 'player';
+    const enemy = document.createElement('div');
+    enemy.id = 'enemy';
+
+    gameContainer.appendChild(player);
+    gameContainer.appendChild(enemy);
+
+    let playerX = 280;
+    let playerY = 180;
+
+    let enemyX = 50;
+    let enemyY = 50;
+
+    let enemySpeedX = 3;
+    let enemySpeedY = 2;
+
+    let isGameOver = false;
+    let points = 0;
+
+    function moveEnemy() {
+      enemyX += enemySpeedX;
+      enemyY += enemySpeedY;
+
+      // Rebote en bordes
+      if (enemyX <= 0 || enemyX >= gameContainer.clientWidth - enemy.clientWidth) enemySpeedX *= -1;
+      if (enemyY <= 0 || enemyY >= gameContainer.clientHeight - enemy.clientHeight) enemySpeedY *= -1;
+
+      enemy.style.left = enemyX + 'px';
+      enemy.style.top = enemyY + 'px';
+    }
+
+    function updatePlayerPosition() {
+      player.style.left = playerX + 'px';
+      player.style.top = playerY + 'px';
+    }
+
+    function checkCollision() {
+      const playerRect = player.getBoundingClientRect();
+      const enemyRect = enemy.getBoundingClientRect();
+
+      // Detectar colisión simple
+      if (!(playerRect.right < enemyRect.left ||
+            playerRect.left > enemyRect.right ||
+            playerRect.bottom < enemyRect.top ||
+            playerRect.top > enemyRect.bottom)) {
+        isGameOver = true;
+        info.textContent = `¡Perdiste! Puntuación: ${points}`;
+        restartBtn.style.display = 'inline-block';
+        clearInterval(gameInterval);
+        window.onkeydown = null;
+      }
+    }
+
+    // Control de teclado
+    window.onkeydown = function(e) {
+      if (isGameOver) return;
+      const step = 10;
+      switch(e.key) {
+        case 'ArrowUp':
+          playerY = Math.max(0, playerY - step);
+          break;
+        case 'ArrowDown':
+          playerY = Math.min(gameContainer.clientHeight - player.clientHeight, playerY + step);
+          break;
+        case 'ArrowLeft':
+          playerX = Math.max(0, playerX - step);
+          break;
+        case 'ArrowRight':
+          playerX = Math.min(gameContainer.clientWidth - player.clientWidth, playerX + step);
+          break;
+      }
+      updatePlayerPosition();
+    };
+
+    updatePlayerPosition();
+
+    gameInterval = setInterval(() => {
+      if (isGameOver) return;
+      moveEnemy();
+      checkCollision();
+      points++;
+      info.textContent = `Puntuación: ${points}`;
+    }, 30);
+
+    restartBtn.onclick = () => game3();
+  }
+
+  // Botones menú
+  document.getElementById('btn-game1').onclick = game1;
+  document.getElementById('btn-game2').onclick = game2;
+  document.getElementById('btn-game3').onclick = game3;
+
+  // Carga inicial: muestra el juego 1
+  game1();
+</script>
+
+</body>
+</html>
+
+
